@@ -4,3 +4,7 @@ html {
 img {
     max-width: 100%;
 }
+.modal-dialog {
+    position: relative;
+    z-index: 1051;
+}

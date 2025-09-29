@@ -41,4 +41,29 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, image, seasons = "", rating = 0 } = req.body ?? {};
+
+    if (!name || !image) {
+      return res.status(400).json({ error: "name та image обовʼязкові" });
+    }
+
+    const [result] = await pool.execute(
+      "UPDATE anime_list SET name=?, image=?, seasons=?, rating=? WHERE id=?",
+      [name.trim(), image.trim(), seasons.trim(), Number(rating), Number(id)]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Not found" });
+    }
+    res.json({ id: Number(id), name, image, seasons, rating: Number(rating) });
+  } catch (e) {
+    console.error("DB update error:", e.code, e.message);
+    res.status(500).json({ code: e.code, message: e.message });
+  }
+});
+
+
 export default router;
