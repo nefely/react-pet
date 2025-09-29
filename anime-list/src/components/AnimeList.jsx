@@ -1,18 +1,23 @@
+// src/components/AnimeList.jsx
 import { useEffect, useState } from "react";
 import EditAnimeModal from "./EditAnimeModal.jsx";
+import ConfirmModal from "./ConfirmModal.jsx";
 
 export default function AnimeList({ refreshKey = 0 }) {
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+
   const [editing, setEditing] = useState(null);
-  const [deletingId, setDeletingId] = useState(null); // <- id, що видаляється
+  const [confirmRow, setConfirmRow] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const load = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/anime");
+      // GET може бути публічним, але credentials не зашкодять
+      const res = await fetch("/api/anime", { credentials: "include" });
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
       setRows(await res.json());
     } catch (e) {
@@ -33,18 +38,20 @@ export default function AnimeList({ refreshKey = 0 }) {
     setEditing(null);
   };
 
-  const handleDelete = async (row) => {
-    if (!window.confirm(`Видалити «${row.name}» (id=${row.id})?`)) return;
-    setErr(null);
-    setDeletingId(row.id);
+  const performDelete = async (row) => {
     try {
-      const res = await fetch(`/api/anime/${row.id}`, { method: "DELETE" });
+      setErr(null);
+      setDeletingId(row.id);
+      const res = await fetch(`/api/anime/${row.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (!res.ok && res.status !== 204) {
         const text = await res.text();
         throw new Error(`HTTP ${res.status}: ${text}`);
       }
-      // оптимістично прибираємо зі списку
       setRows(prev => prev.filter(r => r.id !== row.id));
+      setConfirmRow(null);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -56,14 +63,14 @@ export default function AnimeList({ refreshKey = 0 }) {
     <>
       <div className="vstack gap-3">
         <div className="input-group">
-          <span className="input-group-text btn btn-secondary"><i className="fa-solid fa-magnifying-glass"></i></span>
+          <span className="input-group-text"><i className="fa-solid fa-magnifying-glass"></i></span>
           <input
             className="form-control"
             placeholder="type title…"
             value={q}
             onChange={e => setQ(e.target.value)}
           />
-          <button className="btn btn-secondary" onClick={load}><i className="fa-solid fa-rotate-right"></i></button>
+          <button className="btn btn-outline-secondary" onClick={load}><i className="fa-solid fa-rotate-right"></i></button>
         </div>
 
         {loading && <div className="spinner-border" role="status" />}
@@ -84,31 +91,41 @@ export default function AnimeList({ refreshKey = 0 }) {
               <tbody>
                 {filtered.map(a => (
                   <tr key={a.id}>
-                    <td><img src={a.image} alt={a.name} style={{height:40, width:40, objectFit:"cover"}}/></td>
+                    <td>
+                      <img
+                        src={a.image}
+                        alt={a.name}
+                        style={{height:40, width:40, objectFit:"cover"}}
+                      />
+                    </td>
                     <td>{a.name}</td>
                     <td>{a.seasons}</td>
                     <td>{a.rating}</td>
                     <td className="text-end">
                       <div className="btn-group">
                         <button
-                          className="btn btn-sm btn-primary"
+                          className="btn btn-sm btn-outline-primary"
                           onClick={() => setEditing(a)}
                         >
                           <i className="fa-solid fa-pen-to-square"></i>
                         </button>
                         <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDelete(a)}
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => setConfirmRow(a)}
                           disabled={deletingId === a.id}
                         >
-                          {deletingId === a.id ? "..." : <i className="fa-solid fa-trash"></i>}
+                          {deletingId === a.id ? "..." : <i className="fa-solid fa-trash-can"></i>}
                         </button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={5} className="text-center text-muted py-4">Nothing found</td></tr>
+                  <tr>
+                    <td colSpan={5} className="text-center text-muted py-4">
+                      Nothing found
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -116,12 +133,38 @@ export default function AnimeList({ refreshKey = 0 }) {
         )}
       </div>
 
+      {/* Edit modal */}
       <EditAnimeModal
         show={!!editing}
         initial={editing}
         onClose={() => setEditing(null)}
         onSaved={handleSaved}
       />
+
+      {/* Confirm delete modal */}
+      <ConfirmModal
+        show={!!confirmRow}
+        title="Підтвердження видалення"
+        onCancel={() => setConfirmRow(null)}
+        onConfirm={() => confirmRow && performDelete(confirmRow)}
+        confirmText="Видалити"
+        confirmVariant="danger"
+        busy={deletingId === (confirmRow?.id ?? null)}
+      >
+        {confirmRow && (
+          <div className="d-flex align-items-center gap-3">
+            <img
+              src={confirmRow.image}
+              alt={confirmRow.name}
+              style={{height:60, width:60, objectFit:"cover", borderRadius:8}}
+            />
+            <div>
+              <div>Точно видалити <strong>«{confirmRow.name}»</strong>?</div>
+              <small className="text-muted">ID: {confirmRow.id}</small>
+            </div>
+          </div>
+        )}
+      </ConfirmModal>
     </>
   );
 }

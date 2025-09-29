@@ -25,6 +25,7 @@ export default function AddAnimeModal({ show, onClose, onSaved }) {
             const res = await fetch("/api/anime", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials:"include",
                 body: JSON.stringify({
                     name: form.name.trim(),
                     image: form.image.trim(),

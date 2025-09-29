@@ -1,6 +1,7 @@
 // server/api/anime.js
 import { Router } from "express";
 import mysql from "mysql2/promise";
+import { authRequired } from "./auth.js";
 
 const router = Router();
 
@@ -25,7 +26,7 @@ router.get("/", async (_req, res) => {
 });
 
 // POST /api/anime   <-- ВАЖЛИВО
-router.post("/", async (req, res) => {
+router.post("/", authRequired ,async (req, res) => {
     try {
         const { name, image, seasons = "", rating = 0 } = req.body ?? {};
         if (!name || !image) return res.status(400).json({ error: "name та image обовʼязкові" });
@@ -38,7 +39,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authRequired ,  async (req, res) => {
     try {
         const { id } = req.params;
         const { name, image, seasons = "", rating = 0 } = req.body ?? {};
@@ -59,7 +60,7 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authRequired , async (req, res) => {
   try {
     const { id } = req.params;
     const [result] = await pool.execute(

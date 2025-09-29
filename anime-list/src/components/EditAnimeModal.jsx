@@ -41,6 +41,7 @@ export default function EditAnimeModal({ show, initial, onClose, onSaved }) {
             const res = await fetch(`/api/anime/${form.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
+                credentials:"include",
                 body: JSON.stringify({
                     name: form.name.trim(),
                     image: form.image.trim(),

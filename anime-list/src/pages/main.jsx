@@ -1,13 +1,15 @@
 import { useState } from "react";
 import AnimeList from "../components/AnimeList.jsx";
 import AddAnimeModal from "../components/AddAnimeModal.jsx";
+import AuthStatus from "../components/AuthStatus.jsx";
 
 export default function Main() {
     const [refreshKey, setRefreshKey] = useState(0);
     const [showAdd, setShowAdd] = useState(false);
+    const [user, setUser] = useState(null);
 
     const handleAdded = () => {
-        setRefreshKey((k) => k + 1); // перезавантажити список
+        setRefreshKey((k) => k + 1);
         setShowAdd(false);
     };
 
@@ -15,11 +17,16 @@ export default function Main() {
         <main className="main">
             <section className="py-4">
                 <div className="container">
+                    <div className="mb-4 center">
+                        <AuthStatus onSignedIn={setUser} style={{display: "flex"}}/>
+                    </div>
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <h1 className="title mb-0">Anime List</h1>
-                        <button className="btn btn-success" onClick={() => setShowAdd(true)}>
-                            <i className="fa-solid fa-plus"></i>
-                        </button>
+                        <div className="d-flex align-items-center gap-3">
+                            {user && (
+                                <button className="btn btn-success" onClick={() => setShowAdd(true)}><i className="fa-solid fa-plus"></i></button>
+                            )}
+                        </div>
                     </div>
 
                     <AnimeList refreshKey={refreshKey} />
