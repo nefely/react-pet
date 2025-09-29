@@ -1,26 +1,36 @@
 import { useState } from "react";
 import AnimeList from "../components/AnimeList.jsx";
-import AddAnime from "../components/AddAnime.jsx";
+import AddAnimeModal from "../components/AddAnimeModal.jsx";
 
 export default function Main() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const handleAdded = () => setRefreshKey(k => k + 1); // тригер перезавантаження списку
+  const [showAdd, setShowAdd] = useState(false);
+
+  const handleAdded = () => {
+    setRefreshKey(k => k + 1); // перезавантажити список
+    setShowAdd(false);
+  };
 
   return (
     <main className="main">
       <section className="py-4">
         <div className="container">
-          <h1 className="title mb-3">Anime List</h1>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h1 className="title mb-0">Anime List</h1>
+            <button className="btn btn-success" onClick={() => setShowAdd(true)}>
+              + Add
+            </button>
+          </div>
+
           <AnimeList refreshKey={refreshKey} />
         </div>
       </section>
 
-      <section className="py-4 bg-light">
-        <div className="container">
-          <h2 className="title h3 mb-3">Add Anime</h2>
-          <AddAnime onAdded={handleAdded} />
-        </div>
-      </section>
+        <AddAnimeModal
+            show={showAdd}
+            onClose={() => setShowAdd(false)}
+            onSaved={handleAdded}
+        />
     </main>
   );
 }
