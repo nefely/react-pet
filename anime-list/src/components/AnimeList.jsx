@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import EditAnimeModal from "./EditAnimeModal.jsx";
 import ConfirmModal from "./ConfirmModal.jsx";
 
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPenToSquare, faRotateRight, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+
 export default function AnimeList({ refreshKey = 0 }) {
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState("");
@@ -16,8 +20,13 @@ export default function AnimeList({ refreshKey = 0 }) {
   const load = async () => {
     try {
       setLoading(true);
-      // GET може бути публічним, але credentials не зашкодять
+      setErr(null);
       const res = await fetch("/api/anime", { credentials: "include" });
+      if (res.status === 401) {
+        // не залогінений — це нормальний стан
+        setRows([]);
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
       setRows(await res.json());
     } catch (e) {
@@ -27,7 +36,15 @@ export default function AnimeList({ refreshKey = 0 }) {
     }
   };
 
+  // первинне завантаження та зовнішній "refreshKey"
   useEffect(() => { load(); }, [refreshKey]);
+
+  // слухаємо глобальну подію, яку кидає логін/логаут
+  useEffect(() => {
+    const handler = () => load();
+    window.addEventListener("auth:changed", handler);
+    return () => window.removeEventListener("auth:changed", handler);
+  }, []);
 
   const filtered = rows.filter(a =>
     (a.name ?? "").toLowerCase().includes(q.toLowerCase())
@@ -46,6 +63,7 @@ export default function AnimeList({ refreshKey = 0 }) {
         method: "DELETE",
         credentials: "include",
       });
+      // деякі сервери відповідають 204 без тіла — це ОК
       if (!res.ok && res.status !== 204) {
         const text = await res.text();
         throw new Error(`HTTP ${res.status}: ${text}`);
@@ -63,14 +81,18 @@ export default function AnimeList({ refreshKey = 0 }) {
     <>
       <div className="vstack gap-3">
         <div className="input-group">
-          <span className="input-group-text"><i className="fa-solid fa-magnifying-glass"></i></span>
+          <span className="input-group-text">
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+          </span>
           <input
             className="form-control"
             placeholder="type title…"
             value={q}
             onChange={e => setQ(e.target.value)}
           />
-          <button className="btn btn-outline-secondary" onClick={load}><i className="fa-solid fa-rotate-right"></i></button>
+          <button className="btn btn-outline-secondary" onClick={load} title="Reload">
+            <FontAwesomeIcon icon={faRotateRight} />
+          </button>
         </div>
 
         {loading && <div className="spinner-border" role="status" />}
@@ -81,11 +103,11 @@ export default function AnimeList({ refreshKey = 0 }) {
             <table className="table table-striped align-middle">
               <thead className="table-light">
                 <tr>
-                  <th style={{width:55}}></th>
+                  <th style={{ width: 55 }}></th>
                   <th>Name</th>
                   <th>Seasons</th>
                   <th>Rating</th>
-                  <th style={{width:1}}></th>
+                  <th style={{ width: 1 }}></th>
                 </tr>
               </thead>
               <tbody>
@@ -95,7 +117,7 @@ export default function AnimeList({ refreshKey = 0 }) {
                       <img
                         src={a.image}
                         alt={a.name}
-                        style={{height:40, width:40, objectFit:"cover"}}
+                        style={{ height: 40, width: 40, objectFit: "cover" }}
                       />
                     </td>
                     <td>{a.name}</td>
@@ -106,15 +128,17 @@ export default function AnimeList({ refreshKey = 0 }) {
                         <button
                           className="btn btn-sm btn-outline-primary"
                           onClick={() => setEditing(a)}
+                          title="Edit"
                         >
-                          <i className="fa-solid fa-pen-to-square"></i>
+                          <FontAwesomeIcon icon={faPenToSquare} />
                         </button>
                         <button
                           className="btn btn-sm btn-outline-danger"
                           onClick={() => setConfirmRow(a)}
                           disabled={deletingId === a.id}
+                          title="Delete"
                         >
-                          {deletingId === a.id ? "..." : <i className="fa-solid fa-trash-can"></i>}
+                          {deletingId === a.id ? "..." : <FontAwesomeIcon icon={faTrash} />}
                         </button>
                       </div>
                     </td>
@@ -141,13 +165,13 @@ export default function AnimeList({ refreshKey = 0 }) {
         onSaved={handleSaved}
       />
 
-      {/* Confirm delete modal */}
+      {/* Confirm delete modal (портал усередині компонента) */}
       <ConfirmModal
         show={!!confirmRow}
         title="Delete confirmation"
         onCancel={() => setConfirmRow(null)}
         onConfirm={() => confirmRow && performDelete(confirmRow)}
-        confirmText="Delte"
+        confirmText="Delete"
         confirmVariant="danger"
         busy={deletingId === (confirmRow?.id ?? null)}
       >
@@ -156,10 +180,12 @@ export default function AnimeList({ refreshKey = 0 }) {
             <img
               src={confirmRow.image}
               alt={confirmRow.name}
-              style={{height:60, width:60, objectFit:"cover", borderRadius:8}}
+              style={{ height: 60, width: 60, objectFit: "cover", borderRadius: 8 }}
             />
             <div>
-              <div>Are you sure you want to delete <strong>«{confirmRow.name}»</strong>?</div>
+              <div>
+                Are you sure you want to delete <strong>«{confirmRow.name}»</strong>?
+              </div>
               <small className="text-muted">ID: {confirmRow.id}</small>
             </div>
           </div>

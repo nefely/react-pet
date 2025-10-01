@@ -3,6 +3,10 @@ import AnimeList from "../components/AnimeList.jsx";
 import AddAnimeModal from "../components/AddAnimeModal.jsx";
 import AuthStatus from "../components/AuthStatus.jsx";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+
+
 export default function Main() {
     const [refreshKey, setRefreshKey] = useState(0);
     const [showAdd, setShowAdd] = useState(false);
@@ -24,7 +28,7 @@ export default function Main() {
                         <h1 className="title mb-0">Anime List</h1>
                         <div className="d-flex align-items-center gap-3">
                             {user && (
-                                <button className="btn btn-success" onClick={() => setShowAdd(true)}><i className="fa-solid fa-plus"></i></button>
+                                <button className="btn btn-success" onClick={() => setShowAdd(true)}><FontAwesomeIcon icon={faPlus} /></button>
                             )}
                         </div>
                     </div>

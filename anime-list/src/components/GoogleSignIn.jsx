@@ -4,26 +4,20 @@ import { useEffect, useRef } from "react";
 // singleton для підвантаження скрипта один раз на весь застосунок
 let _gisPromise = null;
 function ensureGisLoaded() {
-  // уже є
   if (window.google?.accounts?.id) return Promise.resolve(window.google.accounts.id);
-
-  // вже завантажується
   if (_gisPromise) return _gisPromise;
 
-  // шукаємо існуючий <script>, якщо є — чекаємо onload
   const existing = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
   if (existing) {
     _gisPromise = new Promise((resolve, reject) => {
       const done = () => resolve(window.google.accounts.id);
       existing.addEventListener("load", done, { once: true });
       existing.addEventListener("error", () => reject(new Error("Failed to load GIS script")), { once: true });
-      // якщо вже завантажено до підписки
       if (window.google?.accounts?.id) done();
     });
     return _gisPromise;
   }
 
-  // додаємо <script>
   _gisPromise = new Promise((resolve, reject) => {
     const s = document.createElement("script");
     s.src = "https://accounts.google.com/gsi/client";
@@ -46,9 +40,7 @@ export default function GoogleSignIn({ onSuccess, onError, buttonProps }) {
     const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!CLIENT_ID) {
       console.error("Missing VITE_GOOGLE_CLIENT_ID in frontend .env");
-      if (mountRef.current) {
-        mountRef.current.textContent = "Google Sign-In is not configured.";
-      }
+      if (mountRef.current) mountRef.current.textContent = "Google Sign-In is not configured.";
       return;
     }
 
@@ -57,7 +49,6 @@ export default function GoogleSignIn({ onSuccess, onError, buttonProps }) {
         const gis = await ensureGisLoaded();
         if (canceled || renderedOnce.current) return;
 
-        // ініціалізація
         gis.initialize({
           client_id: CLIENT_ID,
           ux_mode: "popup",
@@ -71,11 +62,14 @@ export default function GoogleSignIn({ onSuccess, onError, buttonProps }) {
                 body: JSON.stringify({ credential }),
               });
               if (!r.ok) {
-                // Часті причини: 403 (origin не дозволений), 401 (audience mismatch)
                 const text = await r.text();
                 throw new Error(text || `HTTP ${r.status}`);
               }
               const data = await r.json();
+
+              // 🔔 повідомляємо всіх слухачів, що авторизація змінилась
+              window.dispatchEvent(new Event("auth:changed"));
+
               onSuccess?.(data.user);
             } catch (e) {
               console.error("auth post failed:", e);
@@ -84,7 +78,6 @@ export default function GoogleSignIn({ onSuccess, onError, buttonProps }) {
           },
         });
 
-        // рендеримо кнопку (один раз)
         if (mountRef.current && !mountRef.current.firstChild) {
           gis.renderButton(mountRef.current, {
             theme: "outline",
@@ -97,9 +90,7 @@ export default function GoogleSignIn({ onSuccess, onError, buttonProps }) {
         }
       } catch (e) {
         console.error(e);
-        if (mountRef.current) {
-          mountRef.current.textContent = "Failed to load Google Sign-In.";
-        }
+        if (mountRef.current) mountRef.current.textContent = "Failed to load Google Sign-In.";
       }
     }
 
@@ -107,7 +98,7 @@ export default function GoogleSignIn({ onSuccess, onError, buttonProps }) {
 
     return () => {
       canceled = true;
-      // при розмонтуванні очищаємо контейнер, щоб уникнути подвійних кнопок у StrictMode
+      // при розмонтуванні очищаємо контейнер, щоб уникнути дублю кнопки у StrictMode
       if (mountRef.current) mountRef.current.textContent = "";
     };
   }, [onSuccess, onError, buttonProps]);
