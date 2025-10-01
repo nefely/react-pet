@@ -144,10 +144,10 @@ export default function AnimeList({ refreshKey = 0 }) {
       {/* Confirm delete modal */}
       <ConfirmModal
         show={!!confirmRow}
-        title="Підтвердження видалення"
+        title="Delete confirmation"
         onCancel={() => setConfirmRow(null)}
         onConfirm={() => confirmRow && performDelete(confirmRow)}
-        confirmText="Видалити"
+        confirmText="Delte"
         confirmVariant="danger"
         busy={deletingId === (confirmRow?.id ?? null)}
       >
@@ -159,7 +159,7 @@ export default function AnimeList({ refreshKey = 0 }) {
               style={{height:60, width:60, objectFit:"cover", borderRadius:8}}
             />
             <div>
-              <div>Точно видалити <strong>«{confirmRow.name}»</strong>?</div>
+              <div>Are you sure you want to delete <strong>«{confirmRow.name}»</strong>?</div>
               <small className="text-muted">ID: {confirmRow.id}</small>
             </div>
           </div>
