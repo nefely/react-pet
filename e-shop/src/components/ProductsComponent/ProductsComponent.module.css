@@ -1,0 +1,46 @@
+.products {
+    
+}
+.grid {
+    display: grid;
+    grid-gap: 1rem;
+    grid-template-columns: repeat(4, 1fr);
+}
+.productCard .line {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.productCard .image {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: var(--bs-gray);
+}
+.productCard .image img {
+    aspect-ratio: 4/3;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+.btnContainer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem
+}
+
+@media screen  and (max-width: 1200px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media screen  and (max-width: 991px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media screen  and (max-width: 767px) {
+    .grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

@@ -1,0 +1,8 @@
+.card {
+    padding: 1rem;
+    border-radius: 0.35rem;
+}
+.card > *:last-child {
+    margin-bottom: 0;
+}
+

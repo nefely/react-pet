@@ -1,0 +1,21 @@
+.product {
+    
+}
+.image {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 4/3;
+    background: var(--bs-gray);
+}
+.image img {
+    aspect-ratio: 4/4;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+.btnContainer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem
+}
