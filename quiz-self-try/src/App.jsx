@@ -47,6 +47,7 @@ function App() {
         setStep(prev => prev + 1); 
     }
 
+
     const stepBack = () => {
         setAnswers(prev => (
             { ...prev, [questions[step - 1].name]: null }
