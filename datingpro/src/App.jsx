@@ -1,14 +1,15 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import SearchPage from './pages/SearchPage'
+import OtherUserPage from './pages/OtherUserPage'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <SearchPage />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SearchPage />} />
+        <Route path="/user/:id" element={<OtherUserPage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
