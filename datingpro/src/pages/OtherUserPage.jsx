@@ -1,17 +1,35 @@
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useAuth } from '../context/AuthContext'
+import { getLikes, toggleLike } from '../hooks/useLikes'
 
 export default function OtherUserPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const { user: authUser } = useAuth()
   const user = useSelector((state) =>
     state.store.users.find((u) => u.id === Number(id))
   )
+
+  const [liked, setLiked] = useState(false)
+
+  useEffect(() => {
+    if (!authUser) return
+    getLikes(authUser.uid).then((ids) => setLiked(ids.includes(Number(id))))
+  }, [authUser, id])
+
+  const handleLike = async () => {
+    if (!authUser) return navigate('/login')
+    const updated = await toggleLike(authUser.uid, Number(id))
+    setLiked(updated.includes(Number(id)))
+  }
 
   if (!user) {
     return (
       <div className="container mt-5 text-center">
         <h4>User not found</h4>
-        <Link to="/" className="btn btn-outline-secondary mt-3">← Back to search</Link>
+        <Link to="/search/" className="btn btn-outline-secondary mt-3">← Back to search</Link>
       </div>
     )
   }
@@ -19,7 +37,7 @@ export default function OtherUserPage() {
   return (
     <div className="container mt-4 mb-5">
 
-      <Link to="/" className="btn btn-outline-secondary mb-4">← Back</Link>
+      <Link to="/search/" className="btn btn-outline-secondary mb-4">← Back to search</Link>
 
       <div className="row g-4">
 
@@ -35,7 +53,15 @@ export default function OtherUserPage() {
 
         {/* Info */}
         <div className="col-md-8">
-          <h2 className="mb-1">{user.name}, {user.age}</h2>
+          <div className="d-flex align-items-center gap-3 mb-1">
+            <h2 className="mb-0">{user.name}, {user.age}</h2>
+            <button
+              onClick={handleLike}
+              className={`btn btn-sm px-3 ${liked ? 'btn-danger' : 'btn-outline-danger'}`}
+            >
+              {liked ? '❤️ Liked' : '♡ Like'}
+            </button>
+          </div>
           <p className="text-muted mb-3">{user.city}, {user.country}</p>
 
           <div className="d-flex gap-2 flex-wrap mb-4">
@@ -95,7 +121,6 @@ export default function OtherUserPage() {
             </div>
           </div>
 
-          <button className="btn btn-danger mt-4 w-100">Like ❤️</button>
         </div>
 
       </div>

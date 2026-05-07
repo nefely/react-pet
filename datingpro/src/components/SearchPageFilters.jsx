@@ -68,7 +68,7 @@ export default function SearchPageFilters() {
                                     className="btn btn-danger"
                                     onClick={() => dispatch(resetFilters())}
                                 >
-                                    Reset filters ✕
+                                ✕
                                 </button>
                             </div>
                         )}
