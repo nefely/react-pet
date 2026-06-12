@@ -37,6 +37,8 @@ function App() {
         }
     ];
 
+    const decrementReal = () => setCounter(prev => Math.max(0, prev - 1));
+
     const maxSteps = questions.length;
     const progress = ((step / maxSteps) * 100).toFixed(0) || 0
 
@@ -58,7 +60,13 @@ function App() {
     return (
         <div className="container">
             {counter}
-            <DaughterComponent counter={counter} setCounter={setCounter}/>
+
+
+            <button className="btn btn-primary" onClick={() =>setCounter(old => old + 1)}>Increment</button>
+            <button className="btn btn-danger" onClick={() => decrementReal(counter)}>Decrement</button>
+            <button className="btn btn-warning" onClick={() =>setCounter(0)}>Reset</button> 
+
+            <DaughterComponent counter={counter} setCounter={setCounter} decrementReal={decrementReal}/>
 
             <div className="row">
                 {/* brand logo */}

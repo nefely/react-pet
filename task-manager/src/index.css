@@ -1,0 +1,79 @@
+:root {
+    --gap: 1.5rem;
+}
+
+body {
+    min-height: 100dvh;
+}
+.task-board .container-fluid {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 1600px;
+}
+.task-row {
+    overflow-x: auto;
+}
+.task-row {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.task-row .inner {
+    min-width: calc( 320px * 4 + var(--gap) );
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: calc(var(--gap) * 0.5);
+    flex-grow: 1;
+}
+.task-column {
+    display: flex;
+    flex-direction: column;
+}
+.tasks {
+    /* background-color: var(--bs-gray-200); */
+    border-radius: calc(var(--gap) * 0.5);
+    padding: calc(var(--gap) * 0.5);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gap) * 0.5);
+}
+.tasks-todo {
+    background-color: var(--bs-primary-border-subtle);
+}
+.tasks-todo .task {
+    border-top: 5px solid var(--bs-primary);
+}
+.tasks-in-progress {
+    background-color: var(--bs-warning-border-subtle);
+}
+.tasks-in-progress .task {
+    border-top: 5px solid var(--bs-warning);
+}
+.tasks-completed {
+    background-color: var(--bs-success-border-subtle);
+}
+.tasks-completed .task {
+    border-top: 5px solid var(--bs-success);
+}
+.tasks-re-do {
+    background-color: var(--bs-danger-border-subtle);
+}
+.tasks-re-do .task {
+    border-top: 5px solid var(--bs-danger);
+}
+.task {
+    background-color: var(--bs-white);
+    border-radius: calc(var(--gap) * 0.25);
+    padding: calc(var(--gap) * 0.5);
+}
+
+.btn-status-group {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+}
+.btn-status-group .btn {
+    font-size: 10px;
+    padding: 6px;
+}
