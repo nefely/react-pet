@@ -133,7 +133,7 @@ function Task({ task }) {
                         ? <button className="btn btn-sm btn-outline-success d-flex align-items-center gap-1" onClick={handleSave}><Check size={14} />Save</button>
                         : <button className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" onClick={() => setIsEditing(true)}><Pencil size={14} />Edit</button>
                     }
-                    <button className="btn btn-sm btn-outline-danger ms-2 d-flex align-items-center gap-1" onClick={() => dispatch(removeTodo(task.id))}><Trash2 size={14} />Delete</button>
+                    <button className="btn btn-sm btn-outline-danger ms-2 d-flex align-items-center gap-1" onClick={() => dispatch(removeTodo(task.id))}><Trash2 size={14} />Remove</button>
                 </div>
             </div>
             <small className="mb-1 text-muted">Status</small>
