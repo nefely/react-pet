@@ -33,10 +33,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Prepare deploy directory
+        run: |
+          mkdir -p deploy/task-manager
+          cp -r dist/* deploy/task-manager/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: deploy
 
   deploy:
     needs: build
