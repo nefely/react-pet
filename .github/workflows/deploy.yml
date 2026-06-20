@@ -39,9 +39,14 @@ jobs:
 
       - uses: actions/configure-pages@v4
 
+      - name: Prepare deploy directory
+        run: |
+          mkdir -p deploy/task-manager
+          cp -r task-manager/dist/* deploy/task-manager/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: task-manager/dist
+          path: deploy
 
       - name: Deploy
         id: deployment
